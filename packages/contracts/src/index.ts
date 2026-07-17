@@ -32,13 +32,13 @@ export const authUserSchema = z.object({
 
 export const registerRequestSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  email: z.email().transform((email) => email.toLowerCase()),
+  email: z.string().trim().toLowerCase().pipe(z.email()),
   password: z.string().min(12).max(128),
   organizationName: z.string().trim().min(2).max(120),
 });
 
 export const loginRequestSchema = z.object({
-  email: z.email().transform((email) => email.toLowerCase()),
+  email: z.string().trim().toLowerCase().pipe(z.email()),
   password: z.string().min(1).max(128),
 });
 

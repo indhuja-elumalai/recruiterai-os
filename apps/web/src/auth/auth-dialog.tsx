@@ -133,6 +133,9 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
             minLength={mode === "register" ? 12 : undefined}
           />
           {mode === "register" && <p className="auth-form__hint">Use at least 12 characters.</p>}
+          {mode === "login" && (
+            <p className="auth-form__hint">Use the password you chose for this workspace.</p>
+          )}
 
           {error && <div className="auth-form__error">{error}</div>}
 

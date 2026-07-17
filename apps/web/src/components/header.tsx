@@ -1,15 +1,17 @@
 "use client";
 
-import { Menu, X, Zap } from "lucide-react";
+import { LoaderCircle, LogOut, Menu, X, Zap } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { AuthDialog, type AuthMode } from "../auth/auth-dialog";
 import { useAuth } from "../auth/auth-context";
+import "./header-auth.css";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [loggingOut, setLoggingOut] = useState(false);
   const { isLoading, logout, user } = useAuth();
   const { scrollY } = useScroll();
 
@@ -42,6 +44,23 @@ export function Header() {
     setAuthOpen(true);
     setMobileMenuOpen(false);
   };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+      setMobileMenuOpen(false);
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const userInitials = user?.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
 
   const scrollToSection = (
     e: React.MouseEvent<HTMLAnchorElement | HTMLDivElement | HTMLButtonElement>,
@@ -107,17 +126,28 @@ export function Header() {
 
             <div className="flex items-center gap-6 border-l border-white/10 pl-10">
               {user ? (
-                <>
-                  <span className="max-w-40 truncate text-sm font-bold text-blue-400">
-                    {user.name}
-                  </span>
+                <div className="header-account">
+                  <div className="header-account__avatar" aria-hidden="true">
+                    {userInitials}
+                  </div>
+                  <div className="header-account__identity">
+                    <span className="header-account__name">{user.name}</span>
+                    <span className="header-account__role">{user.role.toLowerCase()}</span>
+                  </div>
                   <button
-                    onClick={() => void logout()}
-                    className="rounded-full border border-white/10 px-5 py-2 text-xs font-bold text-white hover:bg-white/10"
+                    aria-label={`Log out ${user.name}`}
+                    className="header-account__logout"
+                    disabled={loggingOut}
+                    onClick={() => void handleLogout()}
+                    title="Log out"
                   >
-                    Log out
+                    {loggingOut ? (
+                      <LoaderCircle className="header-account__spinner" size={17} />
+                    ) : (
+                      <LogOut size={17} strokeWidth={2.2} />
+                    )}
                   </button>
-                </>
+                </div>
               ) : (
                 <>
                   <button
@@ -197,12 +227,28 @@ export function Header() {
 
                 <div className="flex flex-col gap-4">
                   {user ? (
-                    <button
-                      onClick={() => void logout()}
-                      className="w-full py-4 text-[#3B82F6] font-bold uppercase tracking-widest"
-                    >
-                      Log out {user.name}
-                    </button>
+                    <div className="mobile-account">
+                      <div className="header-account__avatar" aria-hidden="true">
+                        {userInitials}
+                      </div>
+                      <div className="mobile-account__identity">
+                        <span className="header-account__name">{user.name}</span>
+                        <span className="mobile-account__email">{user.email}</span>
+                      </div>
+                      <button
+                        aria-label={`Log out ${user.name}`}
+                        className="header-account__logout mobile-account__logout"
+                        disabled={loggingOut}
+                        onClick={() => void handleLogout()}
+                        title="Log out"
+                      >
+                        {loggingOut ? (
+                          <LoaderCircle className="header-account__spinner" size={18} />
+                        ) : (
+                          <LogOut size={18} strokeWidth={2.2} />
+                        )}
+                      </button>
+                    </div>
                   ) : (
                     <>
                       <button
