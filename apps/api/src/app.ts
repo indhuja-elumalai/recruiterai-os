@@ -8,6 +8,7 @@ import { notFound } from "./middleware/not-found.js";
 import { requestContext } from "./middleware/request-context.js";
 import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
+import { jobsRouter } from "./routes/jobs.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -26,6 +27,7 @@ export function createApp(): express.Express {
 
   app.use("/api/v1/health", healthRouter);
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/jobs", jobsRouter);
   app.use(notFound);
   app.use(errorHandler);
 
