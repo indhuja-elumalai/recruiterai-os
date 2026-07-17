@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { type PointerEvent, useEffect, useState } from "react";
+import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
 import { ArrowRight, Play, Sparkles, ChevronDown } from "lucide-react";
 import { ChatBubble } from "./chat-bubble";
 
 export function HeroSection() {
   const [phase, setPhase] = useState<"expand" | "contract">("expand");
   const [cycle, setCycle] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   // --- CURSOR GLOW LOGIC ---
   const mouseX = useMotionValue(0);
@@ -20,7 +20,7 @@ export function HeroSection() {
   // FIXED: Added Scroll function for the Explore button
   const handleExploreScroll = () => {
     // You can target the specific section ID that follows the Hero
-    const nextSection = document.querySelector("#how-it-works");
+    const nextSection = document.querySelector("#how-it-works-shell");
     if (nextSection) {
       const offset = 80;
       const bodyRect = document.body.getBoundingClientRect().top;
@@ -36,29 +36,25 @@ export function HeroSection() {
   };
 
   useEffect(() => {
-    setIsMounted(true);
-    const handleMouseMove = (e: MouseEvent) => {
-      const section = document.getElementById("hero-section");
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    
+    let contractTimer: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
       setPhase("expand");
-      const contractTimer = setTimeout(() => setPhase("contract"), 6000);
+      contractTimer = setTimeout(() => setPhase("contract"), 6000);
       setCycle((prev) => prev + 1);
-      return () => clearTimeout(contractTimer);
     }, 8000);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
+      if (contractTimer) clearTimeout(contractTimer);
     };
-  }, [mouseX, mouseY]);
+  }, []);
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    mouseX.set(event.clientX - rect.left);
+    mouseY.set(event.clientY - rect.top);
+  };
 
   const conversations = [
     { name: "Sarah K.", role: "Founder at TechStart", image: "https://i.pravatar.cc/150?u=sarah", message: "Candidates wait 3 weeks for replies. We're losing talent.", position: "top-left" },
@@ -75,12 +71,13 @@ export function HeroSection() {
   return (
     <section 
       id="hero-section" 
+      onPointerMove={handlePointerMove}
       className="relative min-h-screen bg-[#020202] overflow-hidden flex flex-col items-center justify-center pt-20 pb-10"
     >
       {/* --- DYNAMIC CURSOR GLOW --- */}
-      {isMounted && (
+      {!prefersReducedMotion && (
         <motion.div 
-          className="pointer-events-none absolute z-10 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] hidden lg:block"
+          className="pointer-events-none absolute z-10 w-[420px] h-[420px] bg-blue-600/10 rounded-full blur-[80px] hidden lg:block"
           style={{ 
             left: 0,
             top: 0,
@@ -96,7 +93,7 @@ export function HeroSection() {
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="absolute w-[80vw] h-[80vw] max-w-[400px] max-h-[400px] bg-blue-600/20 rounded-full blur-[80px] md:blur-[100px]" />
         
-        {[...Array(15)].map((_, i) => (
+        {!prefersReducedMotion && [...Array(8)].map((_, i) => (
           <motion.div
             key={i}
             animate={{ rotate: 360, scale: [1, 1.2, 1], opacity: [0.1, 0.4, 0.1] }}
@@ -109,7 +106,7 @@ export function HeroSection() {
         {[1, 2, 3].map((ring) => (
           <motion.div
             key={ring}
-            animate={{ 
+            animate={prefersReducedMotion ? undefined : {
               rotate: ring % 2 === 0 ? 360 : -360,
               scale: [1, 1.05, 1],
             }}
@@ -203,8 +200,8 @@ export function HeroSection() {
       {/* FIXED: SCROLL INDICATOR NOW CLICKABLE */}
       <motion.div 
         onClick={handleExploreScroll}
-        animate={{ y: [0, 8, 0] }} 
-        transition={{ duration: 2, repeat: Infinity }} 
+        animate={prefersReducedMotion ? undefined : { y: [0, 8, 0] }}
+        transition={{ duration: 2, repeat: prefersReducedMotion ? 0 : Infinity }}
         className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-600 cursor-pointer z-50 hover:text-white transition-colors"
       >
         <span className="text-[9px] uppercase tracking-[0.4em] font-black">Explore</span>

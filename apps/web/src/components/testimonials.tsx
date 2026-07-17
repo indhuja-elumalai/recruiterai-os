@@ -51,7 +51,7 @@ export function Testimonials() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(30,58,138,0.2),transparent_70%)] pointer-events-none" />
       
       {/* Background Ambient Glow - Updated to a lighter cyan/blue for contrast */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-500/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
         {/* COMPACT & REFINED TOPIC */}
@@ -109,6 +109,8 @@ export function Testimonials() {
                   <div className="flex items-center gap-4 mt-auto border-t border-slate-100 pt-6 md:pt-8">
                     <img 
                       src={t.image} 
+                      loading="lazy"
+                      decoding="async"
                       className="w-10 h-10 md:w-14 md:h-14 rounded-full object-cover border-2 border-blue-600 shadow-md" 
                       alt={t.name} 
                     />

@@ -1,11 +1,11 @@
 "use client";
 
-import { motion, useMotionValue, useSpring } from "framer-motion";
-import { useEffect, useState } from "react";
+import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
+import { type PointerEvent } from "react";
 import { LayeredFlowchart } from "./layered-flowchart"; 
 
 export function HowItWorks() {
-  const [isMounted, setIsMounted] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -13,19 +13,12 @@ export function HowItWorks() {
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
 
-  useEffect(() => {
-    setIsMounted(true);
-    const handleMouseMove = (e: MouseEvent) => {
-      const section = document.getElementById("how-it-works");
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, [mouseX, mouseY]);
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    mouseX.set(event.clientX - rect.left);
+    mouseY.set(event.clientY - rect.top);
+  };
 
   const workflows = [
     {
@@ -105,10 +98,10 @@ export function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="relative bg-[#020202] overflow-hidden">
-      {isMounted && (
+    <section id="how-it-works" onPointerMove={handlePointerMove} className="relative bg-[#020202] overflow-hidden">
+      {!prefersReducedMotion && (
         <motion.div 
-          className="pointer-events-none absolute z-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] hidden lg:block"
+          className="pointer-events-none absolute z-0 w-[420px] h-[420px] bg-blue-600/10 rounded-full blur-[80px] hidden lg:block"
           style={{ x: smoothX, y: smoothY, translateX: "-50%", translateY: "-50%" }}
         />
       )}

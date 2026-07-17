@@ -1,13 +1,13 @@
 "use client";
 
 import { Zap, Clock, Users, CheckCircle, Target, DollarSign, TrendingDown, Sparkles, XCircle } from "lucide-react";
-import { motion, AnimatePresence, useMotionValue, useSpring } from "framer-motion";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
+import { type PointerEvent, useEffect, useState } from "react";
 
 export function ImpactResults() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   
   // Vetting Scanner States
   const [resumeIndex, setResumeIndex] = useState(0);
@@ -54,17 +54,6 @@ export function ImpactResults() {
   ];
 
   useEffect(() => {
-    setIsMounted(true);
-    const handleMouseMove = (e: MouseEvent) => {
-      const section = document.getElementById("impact-results");
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-      }
-    };
-    window.addEventListener("mousemove", handleMouseMove);
-
     // Auto-cycle Resumes
     const interval = setInterval(() => {
       setIsScanning(false);
@@ -72,10 +61,16 @@ export function ImpactResults() {
     }, 5000);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
       clearInterval(interval);
     };
-  }, [mouseX, mouseY, mockResumes.length]);
+  }, [mockResumes.length]);
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (prefersReducedMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    mouseX.set(event.clientX - rect.left);
+    mouseY.set(event.clientY - rect.top);
+  };
 
   // Sync scan bar to card arrival
   useEffect(() => {
@@ -101,15 +96,15 @@ export function ImpactResults() {
   const currentResume = mockResumes[resumeIndex];
 
   return (
-    <section id="impact-results" className="relative min-h-[100dvh] lg:min-h-0 py-12 lg:py-32 bg-[#f8fafc] text-slate-900 overflow-hidden border-y border-slate-200 flex flex-col justify-center">
-      {isMounted && (
-        <motion.div className="pointer-events-none absolute z-10 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] hidden lg:block" style={{ x: smoothX, y: smoothY, translateX: "-50%", translateY: "-50%" }} />
+    <section id="impact-results" onPointerMove={handlePointerMove} className="relative min-h-[100dvh] lg:min-h-0 py-12 lg:py-32 bg-[#f8fafc] text-slate-900 overflow-hidden border-y border-slate-200 flex flex-col justify-center">
+      {!prefersReducedMotion && (
+        <motion.div className="pointer-events-none absolute z-10 w-[420px] h-[420px] bg-blue-600/10 rounded-full blur-[80px] hidden lg:block" style={{ x: smoothX, y: smoothY, translateX: "-50%", translateY: "-50%" }} />
       )}
 
       {/* BACKGROUND ELEMENTS */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 opacity-[0.15] [mask-image:radial-gradient(ellipse_at_center,black,transparent_80%)]" style={{ backgroundImage: `linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)`, backgroundSize: '40px 40px' }} />
-        <motion.div animate={{ scale: [1, 1.2, 1], x: [0, 100, 0], y: [0, 50, 0] }} transition={{ duration: 20, repeat: Infinity, ease: "linear" }} className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-blue-100/40 blur-[120px] rounded-full" />
+        <motion.div animate={prefersReducedMotion ? undefined : { scale: [1, 1.15, 1], x: [0, 80, 0], y: [0, 40, 0] }} transition={{ duration: 20, repeat: prefersReducedMotion ? 0 : Infinity, ease: "linear" }} className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-blue-100/40 blur-[80px] rounded-full" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative z-20 w-full">
@@ -190,7 +185,7 @@ export function ImpactResults() {
               >
                 <div className="flex items-center gap-4 mb-6">
                   <div className="relative">
-                    <img src={currentResume.image} alt={currentResume.name} className="w-16 h-16 rounded-2xl object-cover" />
+                    <img src={currentResume.image} alt={currentResume.name} loading="lazy" decoding="async" className="w-16 h-16 rounded-2xl object-cover" />
                     <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-lg border-2 border-white flex items-center justify-center shadow-sm
                       ${currentResume.status === 'approved' ? 'bg-emerald-500' : currentResume.status === 'rejected' ? 'bg-rose-500' : 'bg-blue-500'}`}>
                       {currentResume.status === 'approved' ? <CheckCircle size={12} className="text-white" /> : 

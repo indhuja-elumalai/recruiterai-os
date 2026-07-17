@@ -2,8 +2,16 @@
 
 import { motion, useInView } from "framer-motion";
 import { useRef, useEffect, useState } from "react";
-import * as LucideIcons from "lucide-react";
+import { ArrowRight, BarChart3, Check, CheckCircle2, Mail, X, Zap } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
+const ICONS: Record<string, LucideIcon> = {
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  Mail,
+  Zap,
+};
 
 interface Step {
   label: string;
@@ -45,8 +53,7 @@ export function LayeredFlowchart({ steps, variant = "layered" }: { steps: Step[]
         {steps.map((layer, index) => {
           // Subtle Y adjustment: tighter on mobile to prevent "elongation"
           const targetY = isInView ? (index * verticalGap - centerOffset) : (index * -10);
-          const iconMap = LucideIcons as unknown as Record<string, LucideIcon>;
-          const IconComponent = iconMap[layer.icon || "ArrowRight"];
+          const IconComponent = ICONS[layer.icon || "ArrowRight"] ?? ArrowRight;
           
           return (
             <motion.div
@@ -90,7 +97,7 @@ export function LayeredFlowchart({ steps, variant = "layered" }: { steps: Step[]
                   <div className="flex items-center gap-3 md:gap-4">
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg flex items-center justify-center border shrink-0"
                          style={{ backgroundColor: `${layer.color}10`, borderColor: `${layer.color}25`, color: layer.color }}>
-                      {IconComponent ? <IconComponent size={isMobile ? 14 : 18} /> : <LucideIcons.ArrowRight size={18} />}
+                      <IconComponent size={isMobile ? 14 : 18} />
                     </div>
 
                     <div className="flex-1 min-w-0 text-left">
@@ -110,11 +117,11 @@ export function LayeredFlowchart({ steps, variant = "layered" }: { steps: Step[]
                       {layer.isFork ? (
                         <div className="mt-1.5 flex flex-wrap gap-1.5">
                           <div className="flex items-center gap-1 text-green-400 text-[8px] md:text-[10px] font-bold bg-green-400/5 py-0.5 px-1.5 rounded border border-green-400/10">
-                            <LucideIcons.Check size={8}/> {layer.yesLabel}
+                            <Check size={8}/> {layer.yesLabel}
                           </div>
                           {isMobile && (
                             <div className="flex items-center gap-1 text-red-400 text-[8px] font-bold bg-red-400/5 py-0.5 px-1.5 rounded border border-red-400/10">
-                              <LucideIcons.X size={8}/> {layer.noLabel}
+                              <X size={8}/> {layer.noLabel}
                             </div>
                           )}
                         </div>

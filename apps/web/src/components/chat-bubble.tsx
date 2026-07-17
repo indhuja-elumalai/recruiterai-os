@@ -47,6 +47,8 @@ export function ChatBubble({ name, role, image, message, position, phase }: Chat
                 <img 
                   src={image} 
                   alt={name} 
+                  loading="lazy"
+                  decoding="async"
                   className="w-10 h-10 rounded-full object-cover border border-white/20 shadow-sm"
                 />
                 {/* Small indicator dot for "Verified" */}

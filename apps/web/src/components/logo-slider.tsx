@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useAnimationFrame } from "framer-motion";
-import { useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useState } from "react";
 
 // Reliable CDN for standard logos
 const GET_LOGO = (slug: string) => `https://cdn.simpleicons.org/${slug}`;
@@ -22,30 +22,8 @@ export function LogoSlider() {
 
   const duplicatedPlatforms = [...platforms, ...platforms];
   
-  const [offset, setOffset] = useState(0);
   const [clickedIndex, setClickedIndex] = useState<number | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useAnimationFrame((t, delta) => {
-    setOffset((prev) => {
-      // Speed control
-      const moveAmount = 0.12 * delta;
-      // Change: Add moveAmount instead of subtracting to move Left -> Right
-      const newOffset = prev + moveAmount;
-
-      const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
-      const itemWidth = isMobile ? 160 : 240;
-      const gap = isMobile ? 32 : 64;
-      const setWidth = platforms.length * (itemWidth + gap);
-
-      // Reset logic for Left -> Right: 
-      // If we move past the setWidth, we snap back to 0
-      if (newOffset >= 0) {
-        return newOffset - setWidth;
-      }
-      return newOffset;
-    });
-  });
+  const prefersReducedMotion = useReducedMotion();
 
   return (
     <section className="py-24 lg:py-32 bg-[#0A0A0A] overflow-hidden border-y border-gray-900">
@@ -66,9 +44,14 @@ export function LogoSlider() {
 
         <div className="flex items-center h-32 overflow-hidden">
           <motion.div 
-            ref={contentRef}
             className="flex gap-8 lg:gap-16 items-center whitespace-nowrap" 
-            style={{ x: offset }}
+            initial={{ x: "-50%" }}
+            animate={{ x: prefersReducedMotion ? "0%" : ["-50%", "0%"] }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : { duration: 55, repeat: Infinity, ease: "linear" }
+            }
           >
             {duplicatedPlatforms.map((platform, index) => (
               <motion.div
@@ -92,6 +75,8 @@ export function LogoSlider() {
                     <img 
                       src={GET_LOGO(platform.slug)} 
                       alt={platform.name}
+                      loading="lazy"
+                      decoding="async"
                       className="w-6 h-6 lg:w-8 lg:h-8 object-contain"
                     />
                   ) : (
