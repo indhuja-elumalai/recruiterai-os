@@ -42,6 +42,11 @@ export const loginRequestSchema = z.object({
   password: z.string().min(1).max(128),
 });
 
+export const developmentPasswordResetRequestSchema = z.object({
+  email: z.string().trim().toLowerCase().pipe(z.email()),
+  newPassword: z.string().min(12).max(128),
+});
+
 export const authResponseSchema = z.object({
   data: z.object({
     user: authUserSchema,
@@ -65,6 +70,7 @@ export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export type DevelopmentPasswordResetRequest = z.infer<typeof developmentPasswordResetRequestSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
 export type CurrentUserResponse = z.infer<typeof currentUserResponseSchema>;
 export type MessageResponse = z.infer<typeof messageResponseSchema>;

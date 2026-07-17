@@ -3,7 +3,9 @@ import { rateLimit } from "express-rate-limit";
 import {
   loginRequestSchema,
   registerRequestSchema,
+  developmentPasswordResetRequestSchema,
   type AuthUser,
+  type DevelopmentPasswordResetRequest,
   type LoginRequest,
   type RegisterRequest,
 } from "@recruiterai/contracts";
@@ -125,6 +127,34 @@ authRouter.post("/login", authLimiter, async (request, response) => {
   setRefreshCookie(response, session.refreshToken);
   response.json({
     data: { user: publicUser(user), accessToken: session.accessToken },
+    requestId: requestId(response),
+  });
+});
+
+authRouter.post("/development/reset-password", authLimiter, async (request, response) => {
+  if (env.NODE_ENV !== "development") {
+    throw new HttpError(404, "RESET_NOT_AVAILABLE", "Password reset is not available");
+  }
+
+  const input = parseBody<DevelopmentPasswordResetRequest>(
+    developmentPasswordResetRequestSchema,
+    request.body,
+  );
+  const user = await User.findOneAndUpdate(
+    { email: input.email },
+    {
+      $set: { passwordHash: await hashPassword(input.newPassword) },
+      $inc: { tokenVersion: 1 },
+    },
+    { new: true },
+  );
+
+  if (!user) {
+    throw new HttpError(404, "USER_NOT_FOUND", "No account exists for this email");
+  }
+
+  response.json({
+    data: { message: "Password reset successfully. You can now log in." },
     requestId: requestId(response),
   });
 });

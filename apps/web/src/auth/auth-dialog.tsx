@@ -1,6 +1,8 @@
 import { type FormEvent, useEffect, useState } from "react";
 import {
   Building2,
+  Eye,
+  EyeOff,
   LoaderCircle,
   LockKeyhole,
   Mail,
@@ -9,11 +11,12 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { ApiRequestError } from "../lib/api";
+import { ApiRequestError, apiRequest } from "../lib/api";
+import type { MessageResponse } from "@recruiterai/contracts";
 import { useAuth } from "./auth-context";
 import "./auth-dialog.css";
 
-export type AuthMode = "login" | "register";
+export type AuthMode = "login" | "register" | "reset";
 
 interface AuthDialogProps {
   mode: AuthMode;
@@ -25,9 +28,13 @@ interface AuthDialogProps {
 export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialogProps) {
   const { login, register } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => setError(null), [mode, open]);
+  useEffect(() => {
+    if (!open) setNotice(null);
+  }, [open]);
   if (!open) return null;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -42,15 +49,32 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
           email: String(values.get("email")),
           password: String(values.get("password")),
         });
-      } else {
+      } else if (mode === "register") {
         await register({
           name: String(values.get("name")),
           email: String(values.get("email")),
           password: String(values.get("password")),
           organizationName: String(values.get("organizationName")),
         });
+        onOpenChange(false);
+      } else {
+        const newPassword = String(values.get("newPassword"));
+        if (newPassword !== String(values.get("confirmPassword"))) {
+          setError("Passwords do not match");
+          return;
+        }
+
+        const response = await apiRequest<MessageResponse>("/auth/development/reset-password", {
+          method: "POST",
+          body: JSON.stringify({
+            email: String(values.get("email")),
+            newPassword,
+          }),
+        });
+        onModeChange("login");
+        setNotice(response.data.message);
       }
-      onOpenChange(false);
+      if (mode === "login") onOpenChange(false);
     } catch (requestError) {
       setError(
         requestError instanceof ApiRequestError
@@ -90,26 +114,40 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
         </div>
 
         <div className="auth-card__header">
-          <h2 id="auth-title">{mode === "login" ? "Welcome back" : "Create your workspace"}</h2>
+          <h2 id="auth-title">
+            {mode === "login"
+              ? "Welcome back"
+              : mode === "register"
+                ? "Create your workspace"
+                : "Reset your password"}
+          </h2>
           <p>
             {mode === "login"
               ? "Sign in to manage your hiring workspace."
-              : "Your first account will be the workspace administrator."}
+              : mode === "register"
+                ? "Your first account will be the workspace administrator."
+                : "Set a new local-development password for your account."}
           </p>
         </div>
 
-        <div className="auth-tabs">
-          {(["login", "register"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => onModeChange(tab)}
-              className={`auth-tabs__button ${mode === tab ? "auth-tabs__button--active" : ""}`}
-            >
-              {tab === "login" ? "Log in" : "Create account"}
-            </button>
-          ))}
-        </div>
+        {mode === "reset" ? (
+          <button className="auth-back" type="button" onClick={() => onModeChange("login")}>
+            Back to login
+          </button>
+        ) : (
+          <div className="auth-tabs">
+            {(["login", "register"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => onModeChange(tab)}
+                className={`auth-tabs__button ${mode === tab ? "auth-tabs__button--active" : ""}`}
+              >
+                {tab === "login" ? "Log in" : "Create account"}
+              </button>
+            ))}
+          </div>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {mode === "register" && (
@@ -124,24 +162,60 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
             </>
           )}
           <AuthInput icon={Mail} label="Email" name="email" type="email" autoComplete="email" />
-          <AuthInput
-            icon={LockKeyhole}
-            label="Password"
-            name="password"
-            type="password"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            minLength={mode === "register" ? 12 : undefined}
-          />
+          {mode === "reset" ? (
+            <>
+              <AuthInput
+                icon={LockKeyhole}
+                label="New password"
+                name="newPassword"
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+              />
+              <AuthInput
+                icon={LockKeyhole}
+                label="Confirm password"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                minLength={12}
+              />
+            </>
+          ) : (
+            <AuthInput
+              icon={LockKeyhole}
+              label="Password"
+              name="password"
+              type="password"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              minLength={mode === "register" ? 12 : undefined}
+            />
+          )}
           {mode === "register" && <p className="auth-form__hint">Use at least 12 characters.</p>}
           {mode === "login" && (
-            <p className="auth-form__hint">Use the password you chose for this workspace.</p>
+            <div className="auth-form__helper-row">
+              <span>Use your workspace password.</span>
+              <button type="button" onClick={() => onModeChange("reset")}>
+                Reset password
+              </button>
+            </div>
+          )}
+          {mode === "reset" && (
+            <p className="auth-form__hint auth-form__hint--warning">
+              Local development only. OTP verification will replace this before production.
+            </p>
           )}
 
           {error && <div className="auth-form__error">{error}</div>}
+          {notice && <div className="auth-form__notice">{notice}</div>}
 
           <button disabled={submitting} className="auth-form__submit">
             {submitting && <LoaderCircle className="auth-form__spinner" size={17} />}
-            {mode === "login" ? "Log in" : "Create account"}
+            {mode === "login"
+              ? "Log in"
+              : mode === "register"
+                ? "Create account"
+                : "Reset password"}
           </button>
         </form>
 
@@ -170,20 +244,39 @@ function AuthInput({
   name,
   type = "text",
 }: AuthInputProps) {
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const isPassword = type === "password";
+  const inputId = `auth-${name}`;
+
   return (
-    <label className="auth-field">
-      <span className="auth-field__label">{label}</span>
+    <div className="auth-field">
+      <label className="auth-field__label" htmlFor={inputId}>
+        {label}
+      </label>
       <span className="auth-field__control">
         <Icon size={15} />
         <input
           required
           autoComplete={autoComplete}
+          id={inputId}
           minLength={minLength}
           name={name}
-          type={type}
+          type={isPassword && passwordVisible ? "text" : type}
           className="auth-field__input"
         />
+        {isPassword && (
+          <button
+            aria-label={
+              passwordVisible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`
+            }
+            className="auth-field__visibility"
+            type="button"
+            onClick={() => setPasswordVisible((visible) => !visible)}
+          >
+            {passwordVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
       </span>
-    </label>
+    </div>
   );
 }
