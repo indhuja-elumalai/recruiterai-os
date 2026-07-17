@@ -14,6 +14,7 @@
     "packages/*"
   ],
   "overrides": {
+    "esbuild": "^0.28.1",
     "lodash": "^4.18.1"
   },
   "scripts": {
@@ -40,6 +41,7 @@
     "prettier": "^3.6.2",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.38.0",
-    "vitest": "^3.2.4"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   }
 }
