@@ -28,6 +28,7 @@ import type {
 } from "@recruiterai/contracts";
 import { useAuth } from "../auth/auth-context";
 import { ApiRequestError, apiRequest } from "../lib/api";
+import { CandidatePipeline } from "./candidate-pipeline";
 import "./recruiter-dashboard.css";
 
 const emptySummary = { total: 0, active: 0, drafts: 0, applicants: 0 };
@@ -143,8 +144,13 @@ export function RecruiterDashboard() {
           <button className="workspace-nav__item">
             <BriefcaseBusiness size={17} /> Jobs <span>{summary.total}</span>
           </button>
-          <button className="workspace-nav__item" disabled>
-            <Users size={17} /> Candidates <small>Next</small>
+          <button
+            className="workspace-nav__item"
+            onClick={() =>
+              document.querySelector("#candidate-pipeline")?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            <Users size={17} /> Candidates
           </button>
           <button className="workspace-nav__item" disabled>
             <Sparkles size={17} /> AI matching <small>Next</small>
@@ -249,6 +255,8 @@ export function RecruiterDashboard() {
             </div>
           )}
         </section>
+
+        <CandidatePipeline accessToken={accessToken!} jobs={jobs} onCandidateChanged={loadJobs} />
       </main>
 
       {editorJob !== undefined && (
