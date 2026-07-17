@@ -1,6 +1,18 @@
-node_modules
-build
-dist
+node_modules/
+build/
+dist/
+coverage/
 *.tsbuildinfo
-.env*
+*.log
+.DS_Store
+
+# Secrets: commit examples, never real credentials.
+.env
+.env.*
 !.env.example
+!**/.env.example
+
+# Local uploads and editor files.
+uploads/
+.idea/
+.vscode/

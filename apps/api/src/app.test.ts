@@ -1,0 +1,24 @@
+import request from "supertest";
+import { describe, expect, it } from "vitest";
+import { healthResponseSchema } from "@recruiterai/contracts";
+import { createApp } from "./app.js";
+
+describe("API foundation", () => {
+  it("returns a typed health response", async () => {
+    const response = await request(createApp()).get("/api/v1/health").expect(200);
+    const parsed = healthResponseSchema.parse(response.body);
+
+    expect(parsed.data.status).toBe("ok");
+    expect(parsed.data.database).toBe("not_configured");
+    expect(response.headers["x-request-id"]).toBe(parsed.requestId);
+  });
+
+  it("returns the standard error envelope for missing routes", async () => {
+    const response = await request(createApp()).get("/api/v1/missing").expect(404);
+
+    expect(response.body.error).toMatchObject({
+      code: "ROUTE_NOT_FOUND",
+    });
+    expect(response.body.error.requestId).toEqual(expect.any(String));
+  });
+});
