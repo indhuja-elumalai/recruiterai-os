@@ -29,6 +29,7 @@ import type {
 import { useAuth } from "../auth/auth-context";
 import { ApiRequestError, apiRequest } from "../lib/api";
 import { CandidatePipeline } from "./candidate-pipeline";
+import { InterviewOperations } from "./interview-operations";
 import "./recruiter-dashboard.css";
 
 const emptySummary = { total: 0, active: 0, drafts: 0, applicants: 0 };
@@ -62,6 +63,7 @@ export function RecruiterDashboard() {
   const [query, setQuery] = useState("");
   const [editorJob, setEditorJob] = useState<Job | null | undefined>(undefined);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [candidateVersion, setCandidateVersion] = useState(0);
 
   const authHeaders = useCallback(
     () => ({ Authorization: `Bearer ${accessToken}` }),
@@ -152,8 +154,8 @@ export function RecruiterDashboard() {
           >
             <Users size={17} /> Candidates
           </button>
-          <button className="workspace-nav__item" disabled>
-            <Sparkles size={17} /> AI matching <small>Next</small>
+          <button className="workspace-nav__item">
+            <Sparkles size={17} /> AI matching
           </button>
         </nav>
         <div className="workspace-sidebar__footer">
@@ -256,7 +258,15 @@ export function RecruiterDashboard() {
           )}
         </section>
 
-        <CandidatePipeline accessToken={accessToken!} jobs={jobs} onCandidateChanged={loadJobs} />
+        <CandidatePipeline
+          accessToken={accessToken!}
+          jobs={jobs}
+          onCandidateChanged={async () => {
+            await loadJobs();
+            setCandidateVersion((version) => version + 1);
+          }}
+        />
+        <InterviewOperations accessToken={accessToken!} refreshKey={candidateVersion} />
       </main>
 
       {editorJob !== undefined && (
