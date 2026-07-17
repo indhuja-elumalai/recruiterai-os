@@ -2,6 +2,8 @@ import { lazy, Suspense } from "react";
 import { Header } from "./components/header";
 import { HeroSection } from "./components/hero-section";
 import { DeferredSection } from "./components/deferred-section";
+import { useAuth } from "./auth/auth-context";
+import { RecruiterDashboard } from "./dashboard/recruiter-dashboard";
 
 const HowItWorks = lazy(() =>
   import("./components/how-it-works").then((module) => ({ default: module.HowItWorks })),
@@ -26,6 +28,18 @@ const Footer = lazy(() =>
 );
 
 export default function App() {
+  const { isLoading, user } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#07090d] flex items-center justify-center text-blue-400">
+        <span className="sr-only">Loading workspace</span>
+      </div>
+    );
+  }
+
+  if (user) return <RecruiterDashboard />;
+
   return (
     <div className="min-h-screen bg-[#0A0A0A]">
       <Header />

@@ -5,9 +5,9 @@ MERN and AI engineering portfolio project. It will cover the hiring lifecycle fr
 creation and public applications through explainable resume matching, screening,
 scheduling, interview feedback, and recruitment analytics.
 
-> Current status: optimized full-stack foundation with the first authentication workflow.
-> The existing public landing page is preserved while product workflows are implemented
-> branch by branch.
+> Current status: optimized full-stack foundation with authentication and an authenticated,
+> MongoDB-backed job management workspace. The public landing page remains available to
+> signed-out visitors while product workflows are implemented branch by branch.
 
 ## Technology
 
@@ -68,6 +68,18 @@ The first product slice provides MongoDB-backed account and session operations:
 Passwords use Node.js scrypt with unique salts. Refresh tokens are signed, HTTP-only,
 rotated on use, and revoked on logout; access tokens are short-lived and kept in browser
 memory. Authentication endpoints also include schema validation and rate limiting.
+
+## Job management API
+
+Authenticated recruiters can create and manage account-scoped job requisitions:
+
+- `GET /api/v1/jobs`
+- `POST /api/v1/jobs`
+- `PATCH /api/v1/jobs/:jobId`
+
+The shared contracts validate job details, salary ranges, employment/workplace types, and
+the draft, published, paused, and closed lifecycle. Every database query is scoped to the
+authenticated owner before job data is returned or changed.
 
 ## Git workflow
 
