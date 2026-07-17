@@ -56,6 +56,16 @@ npm test
 npm run build
 ```
 
+Create a populated local demo after configuring `.env`:
+
+```bash
+npm run seed
+```
+
+The seed is idempotent and creates an administrator, published AI engineering role,
+candidate, explainable match, and upcoming structured interview. Use `SEED_ADMIN_EMAIL`
+and `SEED_DEMO_PASSWORD` to sign in.
+
 ## Authentication API
 
 The first product slice provides MongoDB-backed account and session operations:
@@ -123,6 +133,10 @@ meeting links, complete or cancel sessions, and submit consistent ratings, recom
 strengths, concerns, and notes. Scheduling remains fully usable with the local calendar
 fallback when Google Calendar is not connected.
 
+Interview cards include a free Google Calendar add-event link. When `RESEND_API_KEY` and
+`EMAIL_FROM` are configured, scheduling also sends the candidate a transactional invitation;
+delivery failure is recorded but never blocks the locally persisted schedule.
+
 ## Recruitment analytics
 
 `GET /api/v1/analytics/overview` provides account-scoped operational reporting without
@@ -144,6 +158,12 @@ are pushed only after local review and approval.
 - Marketing and compliance claims must be demonstrable and documented.
 - Candidate data is handled as sensitive personal information.
 - Every core workflow remains usable when an optional external provider is unavailable.
+
+## Documentation
+
+- [Architecture and trust boundaries](docs/ARCHITECTURE.md)
+- [API reference](docs/API.md)
+- [Security policy](SECURITY.md)
 
 ## Author
 
