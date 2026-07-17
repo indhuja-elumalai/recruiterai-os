@@ -1,5 +1,14 @@
 import { type FormEvent, useEffect, useState } from "react";
-import { Building2, LoaderCircle, LockKeyhole, Mail, User, X } from "lucide-react";
+import {
+  Building2,
+  LoaderCircle,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  User,
+  X,
+  Zap,
+} from "lucide-react";
 import { ApiRequestError } from "../lib/api";
 import { useAuth } from "./auth-context";
 
@@ -53,41 +62,70 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center px-4">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6">
       <button
         aria-label="Close authentication dialog"
-        className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+        className="absolute inset-0 cursor-default bg-[#020202]/90"
         onClick={() => onOpenChange(false)}
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="auth-title"
-        className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#0b0b0d] p-7 text-white shadow-2xl"
+        className="relative max-h-[calc(100dvh-2rem)] w-full max-w-[390px] overflow-y-auto rounded-[1.75rem] border border-blue-500/20 bg-[#08090c] p-5 text-white shadow-[0_30px_100px_rgba(0,0,0,0.8),0_0_45px_rgba(37,99,235,0.10)] sm:p-6"
       >
+        <div className="absolute inset-x-12 top-0 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
         <button
           aria-label="Close"
-          className="absolute right-5 top-5 rounded-full border border-white/10 p-2 text-slate-400 hover:text-white"
+          className="absolute right-4 top-4 rounded-full border border-white/10 bg-[#11131a] p-2 text-slate-500 transition hover:border-white/20 hover:text-white"
           onClick={() => onOpenChange(false)}
         >
-          <X size={16} />
+          <X size={15} />
         </button>
 
-        <div className="mb-7">
-          <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-blue-400">
-            Backend connected
+        <div className="mb-5 flex items-center gap-2.5">
+          <div className="relative flex size-9 items-center justify-center rounded-xl border border-blue-400/20 bg-blue-600 shadow-[0_0_20px_rgba(37,99,235,0.28)]">
+            <Zap className="size-4 fill-current" />
           </div>
-          <h2 id="auth-title" className="text-3xl font-black tracking-tight">
+          <div>
+            <div className="text-sm font-bold tracking-tight">
+              Recruiter<span className="text-blue-500">AI</span>
+            </div>
+            <div className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-[0.16em] text-slate-500">
+              <ShieldCheck size={10} className="text-blue-500" /> Secure workspace
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-5">
+          <h2 id="auth-title" className="text-2xl font-black tracking-[-0.03em]">
             {mode === "login" ? "Welcome back" : "Create your workspace"}
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-slate-400">
+          <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
             {mode === "login"
-              ? "Sign in securely to continue to RecruiterAI OS."
-              : "Your first account becomes the workspace administrator."}
+              ? "Sign in to manage your hiring workspace."
+              : "Your first account will be the workspace administrator."}
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <div className="mb-5 grid grid-cols-2 rounded-xl border border-white/[0.07] bg-[#0d0f14] p-1">
+          {(["login", "register"] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => onModeChange(tab)}
+              className={`h-9 rounded-lg text-xs font-bold transition ${
+                mode === tab
+                  ? "bg-blue-600 text-white shadow-[0_5px_16px_rgba(37,99,235,0.24)]"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              {tab === "login" ? "Log in" : "Create account"}
+            </button>
+          ))}
+        </div>
+
+        <form className="space-y-3.5" onSubmit={handleSubmit}>
           {mode === "register" && (
             <>
               <AuthInput icon={User} label="Full name" name="name" autoComplete="name" />
@@ -108,28 +146,28 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
             autoComplete={mode === "login" ? "current-password" : "new-password"}
             minLength={mode === "register" ? 12 : undefined}
           />
+          {mode === "register" && (
+            <p className="-mt-1 text-[10px] text-slate-600">Use at least 12 characters.</p>
+          )}
 
           {error && (
-            <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
+            <div className="rounded-xl border border-red-400/20 bg-[#211014] px-3.5 py-2.5 text-xs text-red-300">
               {error}
             </div>
           )}
 
           <button
             disabled={submitting}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 font-bold transition hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 text-sm font-bold shadow-[0_10px_28px_rgba(37,99,235,0.22)] transition hover:bg-blue-500 disabled:cursor-wait disabled:opacity-60"
           >
             {submitting && <LoaderCircle className="animate-spin" size={17} />}
             {mode === "login" ? "Log in" : "Create account"}
           </button>
         </form>
 
-        <button
-          className="mt-5 w-full text-center text-sm text-slate-400 hover:text-white"
-          onClick={() => onModeChange(mode === "login" ? "register" : "login")}
-        >
-          {mode === "login" ? "Need an account? Create one" : "Already registered? Log in"}
-        </button>
+        <p className="mt-4 text-center text-[10px] leading-relaxed text-slate-600">
+          Protected by encrypted credentials and secure session cookies.
+        </p>
       </div>
     </div>
   );
@@ -154,18 +192,18 @@ function AuthInput({
 }: AuthInputProps) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-500">
+      <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">
         {label}
       </span>
-      <span className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 focus-within:border-blue-500/70">
-        <Icon size={17} className="text-slate-500" />
+      <span className="flex items-center gap-3 rounded-xl border border-white/[0.08] bg-[#0d1017] px-3.5 transition focus-within:border-blue-500/70 focus-within:bg-[#10141d] focus-within:ring-2 focus-within:ring-blue-500/10">
+        <Icon size={15} className="text-slate-600" />
         <input
           required
           autoComplete={autoComplete}
           minLength={minLength}
           name={name}
           type={type}
-          className="h-12 w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-600"
+          className="h-11 w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-700"
         />
       </span>
     </label>
