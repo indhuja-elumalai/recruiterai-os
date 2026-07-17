@@ -21,4 +21,18 @@ describe("API foundation", () => {
     });
     expect(response.body.error.requestId).toEqual(expect.any(String));
   });
+
+  it("rejects invalid registration data before database access", async () => {
+    const response = await request(createApp())
+      .post("/api/v1/auth/register")
+      .send({ email: "invalid", password: "short" })
+      .expect(422);
+
+    expect(response.body.error.code).toBe("VALIDATION_ERROR");
+  });
+
+  it("protects authenticated routes", async () => {
+    const response = await request(createApp()).get("/api/v1/auth/me").expect(401);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
+  });
 });

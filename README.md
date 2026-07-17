@@ -5,8 +5,9 @@ MERN and AI engineering portfolio project. It will cover the hiring lifecycle fr
 creation and public applications through explainable resume matching, screening,
 scheduling, interview feedback, and recruitment analytics.
 
-> Current status: foundation in progress. The existing public landing page is preserved;
-> authenticated product workflows are being implemented branch by branch.
+> Current status: optimized full-stack foundation with the first authentication workflow.
+> The existing public landing page is preserved while product workflows are implemented
+> branch by branch.
 
 ## Technology
 
@@ -53,6 +54,20 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+## Authentication API
+
+The first product slice provides MongoDB-backed account and session operations:
+
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `GET /api/v1/auth/me`
+- `POST /api/v1/auth/logout`
+
+Passwords use Node.js scrypt with unique salts. Refresh tokens are signed, HTTP-only,
+rotated on use, and revoked on logout; access tokens are short-lived and kept in browser
+memory. Authentication endpoints also include schema validation and rate limiting.
 
 ## Git workflow
 

@@ -8,7 +8,13 @@ const environmentSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   WEB_URL: z.url().default("http://localhost:5173"),
   MONGODB_URI: z.string().min(1).optional(),
+  MONGODB_DB_NAME: z.string().min(1).default("recruiterai"),
   APP_VERSION: z.string().default("0.1.0"),
+  JWT_ACCESS_SECRET: z.string().min(32).optional(),
+  JWT_REFRESH_SECRET: z.string().min(32).optional(),
+  COOKIE_SECRET: z.string().min(32).optional(),
+  ACCESS_TOKEN_TTL: z.string().default("15m"),
+  REFRESH_TOKEN_TTL: z.string().default("7d"),
 });
 
 const result = environmentSchema.safeParse(process.env);

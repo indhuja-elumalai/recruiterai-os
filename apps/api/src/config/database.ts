@@ -9,6 +9,7 @@ export async function connectDatabase(): Promise<void> {
   }
 
   await mongoose.connect(env.MONGODB_URI, {
+    dbName: env.MONGODB_DB_NAME,
     serverSelectionTimeoutMS: 5_000,
   });
   logger.info("database_connected");

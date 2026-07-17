@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import { env } from "../config/env.js";
 import { logger } from "../lib/logger.js";
+import { HttpError } from "../lib/http-error.js";
 
 export function errorHandler(
   error: unknown,
@@ -9,17 +10,21 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   const message = error instanceof Error ? error.message : "Unknown server error";
+  const status = error instanceof HttpError ? error.status : 500;
+  const code = error instanceof HttpError ? error.code : "INTERNAL_SERVER_ERROR";
 
-  logger.error("unhandled_request_error", {
+  logger[status >= 500 ? "error" : "warn"]("request_error", {
     requestId: response.locals.requestId,
     error: message,
   });
 
-  response.status(500).json({
+  response.status(status).json({
     error: {
-      code: "INTERNAL_SERVER_ERROR",
-      message: env.NODE_ENV === "production" ? "An unexpected error occurred" : message,
+      code,
+      message:
+        status >= 500 && env.NODE_ENV === "production" ? "An unexpected error occurred" : message,
       requestId: response.locals.requestId,
+      ...(error instanceof HttpError && error.details ? { details: error.details } : {}),
     },
   });
 }

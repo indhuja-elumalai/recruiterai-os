@@ -35,19 +35,19 @@ export default function App() {
           <DeferredSection id="how-it-works-shell" minHeight="2800px">
             <HowItWorks />
           </DeferredSection>
-          <DeferredSection minHeight="900px">
+          <DeferredSection id="impact-results-shell" minHeight="900px">
             <ImpactResults />
           </DeferredSection>
           <DeferredSection minHeight="420px">
             <LogoSlider />
           </DeferredSection>
-          <DeferredSection minHeight="760px">
+          <DeferredSection id="testimonials-shell" minHeight="760px">
             <Testimonials />
           </DeferredSection>
-          <DeferredSection minHeight="760px">
+          <DeferredSection id="faq-section-shell" minHeight="760px">
             <FaqSection />
           </DeferredSection>
-          <DeferredSection minHeight="520px">
+          <DeferredSection id="final-cta-shell" minHeight="520px">
             <FinalCta />
           </DeferredSection>
         </Suspense>
