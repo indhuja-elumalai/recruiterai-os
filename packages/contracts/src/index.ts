@@ -140,6 +140,63 @@ export const jobsResponseSchema = z.object({
   requestId: z.string(),
 });
 
+export const candidateStatusSchema = z.enum([
+  "APPLIED",
+  "SCREENING",
+  "INTERVIEW",
+  "OFFER",
+  "HIRED",
+  "REJECTED",
+]);
+
+export const createCandidateRequestSchema = z.object({
+  jobId: z.string().trim().min(1),
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().toLowerCase().pipe(z.email()),
+  phone: z.string().trim().min(7).max(24),
+  location: z.string().trim().min(2).max(120),
+  currentTitle: z.string().trim().min(2).max(120),
+  yearsExperience: z.number().min(0).max(60),
+  skills: z.array(z.string().trim().min(1).max(50)).min(1).max(30),
+});
+
+export const updateCandidateStatusRequestSchema = z.object({
+  status: candidateStatusSchema,
+});
+
+export const candidateSchema = createCandidateRequestSchema.extend({
+  id: z.string(),
+  ownerId: z.string(),
+  jobTitle: z.string(),
+  status: candidateStatusSchema,
+  resume: z.object({
+    fileName: z.string(),
+    mimeType: z.string(),
+    extractedCharacters: z.number().int().nonnegative(),
+    preview: z.string(),
+  }),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const candidateResponseSchema = z.object({
+  data: z.object({ candidate: candidateSchema }),
+  requestId: z.string(),
+});
+
+export const candidatesResponseSchema = z.object({
+  data: z.object({
+    candidates: z.array(candidateSchema),
+    summary: z.object({
+      total: z.number().int().nonnegative(),
+      screening: z.number().int().nonnegative(),
+      interviews: z.number().int().nonnegative(),
+      hired: z.number().int().nonnegative(),
+    }),
+  }),
+  requestId: z.string(),
+});
+
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
@@ -157,3 +214,9 @@ export type UpdateJobRequest = z.infer<typeof updateJobRequestSchema>;
 export type Job = z.infer<typeof jobSchema>;
 export type JobResponse = z.infer<typeof jobResponseSchema>;
 export type JobsResponse = z.infer<typeof jobsResponseSchema>;
+export type CandidateStatus = z.infer<typeof candidateStatusSchema>;
+export type CreateCandidateRequest = z.infer<typeof createCandidateRequestSchema>;
+export type UpdateCandidateStatusRequest = z.infer<typeof updateCandidateStatusRequestSchema>;
+export type Candidate = z.infer<typeof candidateSchema>;
+export type CandidateResponse = z.infer<typeof candidateResponseSchema>;
+export type CandidatesResponse = z.infer<typeof candidatesResponseSchema>;

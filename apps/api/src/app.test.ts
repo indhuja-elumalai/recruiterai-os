@@ -40,4 +40,9 @@ describe("API foundation", () => {
     const response = await request(createApp()).get("/api/v1/jobs").expect(401);
     expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
   });
+
+  it("protects candidate data from unauthenticated access", async () => {
+    const response = await request(createApp()).get("/api/v1/candidates").expect(401);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
+  });
 });
