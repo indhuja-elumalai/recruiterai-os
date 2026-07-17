@@ -1,6 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import {
   BriefcaseBusiness,
+  BarChart3,
   Building2,
   CalendarDays,
   ChevronRight,
@@ -30,6 +31,7 @@ import { useAuth } from "../auth/auth-context";
 import { ApiRequestError, apiRequest } from "../lib/api";
 import { CandidatePipeline } from "./candidate-pipeline";
 import { InterviewOperations } from "./interview-operations";
+import { RecruitmentAnalytics } from "./recruitment-analytics";
 import "./recruiter-dashboard.css";
 
 const emptySummary = { total: 0, active: 0, drafts: 0, applicants: 0 };
@@ -157,6 +159,16 @@ export function RecruiterDashboard() {
           <button className="workspace-nav__item">
             <Sparkles size={17} /> AI matching
           </button>
+          <button
+            className="workspace-nav__item"
+            onClick={() =>
+              document
+                .querySelector("#recruitment-analytics")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            <BarChart3 size={17} /> Analytics
+          </button>
         </nav>
         <div className="workspace-sidebar__footer">
           <div className="workspace-user__avatar">{initials(user.name)}</div>
@@ -267,6 +279,7 @@ export function RecruiterDashboard() {
           }}
         />
         <InterviewOperations accessToken={accessToken!} refreshKey={candidateVersion} />
+        <RecruitmentAnalytics accessToken={accessToken!} />
       </main>
 
       {editorJob !== undefined && (
