@@ -10,6 +10,7 @@ import { healthRouter } from "./routes/health.js";
 import { authRouter } from "./routes/auth.js";
 import { jobsRouter } from "./routes/jobs.js";
 import { candidatesRouter } from "./routes/candidates.js";
+import { matchesRouter } from "./routes/matches.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -30,6 +31,7 @@ export function createApp(): express.Express {
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/jobs", jobsRouter);
   app.use("/api/v1/candidates", candidatesRouter);
+  app.use("/api/v1/matches", matchesRouter);
   app.use(notFound);
   app.use(errorHandler);
 

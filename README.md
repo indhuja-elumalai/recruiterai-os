@@ -96,6 +96,18 @@ discarded after extraction; only normalized text, a short preview, and auditable
 metadata are retained. Candidate and job lookups are account-scoped, and duplicate
 candidate/job assignments are rejected.
 
+## Explainable AI matching
+
+Recruiters can generate evidence-based job-fit analyses with `POST
+/api/v1/matches/candidates/:candidateId` and retrieve saved analyses from `GET
+/api/v1/matches`. When `GEMINI_API_KEY` is configured, the API requests structured output
+from the configured Gemini model. If Gemini is unavailable or quota-limited, a deterministic
+skill-overlap and keyword-coverage algorithm produces the same typed response shape.
+
+Every result includes a score, strengths, gaps, rationale, model/source metadata, and a clear
+human-review recommendation. Match scores provide decision support only and never trigger
+autonomous rejection.
+
 ## Git workflow
 
 `main` contains releases, `develop` is the integration branch, and each bounded feature is

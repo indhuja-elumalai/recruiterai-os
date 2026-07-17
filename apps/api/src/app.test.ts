@@ -45,4 +45,9 @@ describe("API foundation", () => {
     const response = await request(createApp()).get("/api/v1/candidates").expect(401);
     expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
   });
+
+  it("protects candidate match analysis from unauthenticated access", async () => {
+    const response = await request(createApp()).get("/api/v1/matches").expect(401);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
+  });
 });

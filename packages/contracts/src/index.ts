@@ -197,6 +197,32 @@ export const candidatesResponseSchema = z.object({
   requestId: z.string(),
 });
 
+export const matchSourceSchema = z.enum(["GEMINI", "DETERMINISTIC"]);
+export const candidateMatchSchema = z.object({
+  id: z.string(),
+  candidateId: z.string(),
+  jobId: z.string(),
+  score: z.number().int().min(0).max(100),
+  recommendation: z.enum(["STRONG_MATCH", "POTENTIAL_MATCH", "REVIEW_REQUIRED"]),
+  strengths: z.array(z.string()),
+  gaps: z.array(z.string()),
+  summary: z.string(),
+  rationale: z.string(),
+  source: matchSourceSchema,
+  model: z.string(),
+  analyzedAt: z.string(),
+});
+
+export const candidateMatchResponseSchema = z.object({
+  data: z.object({ match: candidateMatchSchema }),
+  requestId: z.string(),
+});
+
+export const candidateMatchesResponseSchema = z.object({
+  data: z.object({ matches: z.array(candidateMatchSchema) }),
+  requestId: z.string(),
+});
+
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
@@ -220,3 +246,7 @@ export type UpdateCandidateStatusRequest = z.infer<typeof updateCandidateStatusR
 export type Candidate = z.infer<typeof candidateSchema>;
 export type CandidateResponse = z.infer<typeof candidateResponseSchema>;
 export type CandidatesResponse = z.infer<typeof candidatesResponseSchema>;
+export type MatchSource = z.infer<typeof matchSourceSchema>;
+export type CandidateMatch = z.infer<typeof candidateMatchSchema>;
+export type CandidateMatchResponse = z.infer<typeof candidateMatchResponseSchema>;
+export type CandidateMatchesResponse = z.infer<typeof candidateMatchesResponseSchema>;

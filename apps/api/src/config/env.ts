@@ -15,6 +15,16 @@ const environmentSchema = z.object({
   COOKIE_SECRET: z.string().min(32).optional(),
   ACCESS_TOKEN_TTL: z.string().default("15m"),
   REFRESH_TOKEN_TTL: z.string().default("7d"),
+  GEMINI_API_KEY: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined),
+  GEMINI_MODEL: z
+    .string()
+    .trim()
+    .default("gemini-3.1-flash-lite")
+    .transform((value) => value || "gemini-3.1-flash-lite"),
 });
 
 const result = environmentSchema.safeParse(process.env);
