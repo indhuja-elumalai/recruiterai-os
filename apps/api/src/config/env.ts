@@ -25,6 +25,33 @@ const environmentSchema = z.object({
     .trim()
     .default("gemini-3.1-flash-lite")
     .transform((value) => value || "gemini-3.1-flash-lite"),
+  SEED_ORGANIZATION_NAME: z.string().trim().default("Ind Technologies"),
+  SEED_ADMIN_EMAIL: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email())
+    .default("admin@demo.recruiterai.dev"),
+  SEED_CANDIDATE_EMAIL: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email())
+    .default("candidate@demo.recruiterai.dev"),
+  SEED_DEMO_PASSWORD: z
+    .string()
+    .optional()
+    .transform((value) => value || undefined),
+  RESEND_API_KEY: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined),
+  EMAIL_FROM: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => value || undefined),
 });
 
 const result = environmentSchema.safeParse(process.env);

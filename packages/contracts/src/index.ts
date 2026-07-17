@@ -260,6 +260,7 @@ export const interviewSchema = scheduleInterviewRequestSchema.extend({
   jobTitle: z.string(),
   status: interviewStatusSchema,
   calendarProvider: z.enum(["LOCAL", "GOOGLE"]),
+  notificationStatus: z.enum(["SKIPPED", "SENT", "FAILED"]),
   questions: z.array(z.string()),
   feedback: interviewFeedbackRequestSchema.extend({ submittedAt: z.string() }).nullable(),
   createdAt: z.string(),

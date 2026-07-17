@@ -24,7 +24,18 @@ export async function apiRequest<T>(path: string, init: RequestInit = {}): Promi
     headers,
   });
 
-  const body = (await response.json()) as T | ApiError;
+  const contentType = response.headers.get("content-type") ?? "";
+  const body = contentType.includes("application/json")
+    ? ((await response.json()) as T | ApiError)
+    : ({
+        error: {
+          code: "INVALID_API_RESPONSE",
+          message: response.ok
+            ? "The API returned an unsupported response"
+            : `The API request failed with status ${response.status}`,
+          requestId: response.headers.get("x-request-id") ?? "unknown",
+        },
+      } as ApiError);
   if (!response.ok) {
     const apiError = body as ApiError;
     throw new ApiRequestError(

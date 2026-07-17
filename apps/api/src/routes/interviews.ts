@@ -11,6 +11,7 @@ import {
 } from "@recruiterai/contracts";
 import { HttpError } from "../lib/http-error.js";
 import { generateInterviewQuestions } from "../lib/screening.js";
+import { sendInterviewInvitation } from "../lib/email.js";
 import { authenticate } from "../middleware/authenticate.js";
 import { Candidate } from "../models/candidate.js";
 import { Interview, type InterviewDocument } from "../models/interview.js";
@@ -50,6 +51,7 @@ function publicInterview(interview: InterviewDocument): InterviewContract {
     notes: interview.notes,
     status: interview.status,
     calendarProvider: interview.calendarProvider,
+    notificationStatus: interview.notificationStatus,
     questions: interview.questions,
     feedback: interview.feedback
       ? {
@@ -120,6 +122,16 @@ interviewsRouter.post("/", async (request, response) => {
       stage: input.stage,
     }),
   });
+  interview.notificationStatus = await sendInterviewInvitation({
+    candidateEmail: candidate.email,
+    candidateName: candidate.name,
+    jobTitle: job.title,
+    meetingUrl: input.meetingUrl,
+    scheduledAt: new Date(input.scheduledAt),
+    stage: input.stage,
+    timezone: input.timezone,
+  });
+  await interview.save();
   if (candidate.status === "APPLIED" || candidate.status === "SCREENING") {
     await Candidate.findByIdAndUpdate(candidate._id, { $set: { status: "INTERVIEW" } });
   }

@@ -37,12 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(response.data.accessToken);
   }, []);
 
+  const refreshSession = useCallback(async () => {
+    const response = await apiRequest<AuthResponse>("/auth/refresh", { method: "POST" });
+    applySession(response);
+  }, [applySession]);
+
   useEffect(() => {
     let active = true;
-    apiRequest<AuthResponse>("/auth/refresh", { method: "POST" })
-      .then((response) => {
-        if (active) applySession(response);
-      })
+    refreshSession()
       .catch(() => undefined)
       .finally(() => {
         if (active) setIsLoading(false);
@@ -50,7 +52,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       active = false;
     };
-  }, [applySession]);
+  }, [refreshSession]);
+
+  useEffect(() => {
+    if (!user) return;
+    const refresh = () => {
+      void refreshSession().catch(() => {
+        setUser(null);
+        setAccessToken(null);
+      });
+    };
+    const interval = window.setInterval(refresh, 12 * 60 * 1_000);
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") refresh();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [refreshSession, user]);
 
   const login = useCallback(
     async (input: LoginRequest) => {

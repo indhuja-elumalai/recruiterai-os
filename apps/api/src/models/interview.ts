@@ -41,6 +41,12 @@ const interviewSchema = new Schema(
       index: true,
     },
     calendarProvider: { type: String, enum: ["LOCAL", "GOOGLE"], default: "LOCAL" },
+    notificationStatus: {
+      type: String,
+      enum: ["SKIPPED", "SENT", "FAILED"],
+      default: "SKIPPED",
+      required: true,
+    },
     questions: [{ type: String, required: true }],
     feedback: { type: feedbackSchema, default: null },
   },

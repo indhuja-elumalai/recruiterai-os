@@ -1,6 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import {
   CalendarClock,
+  CalendarPlus,
   CheckCircle2,
   ClipboardCheck,
   Clock3,
@@ -177,6 +178,7 @@ export function InterviewOperations({
                   <small>
                     <Clock3 size={12} /> {new Date(interview.scheduledAt).toLocaleString("en-IN")} ·{" "}
                     {interview.durationMinutes} min
+                    {interview.notificationStatus === "SENT" ? " · Email sent" : ""}
                   </small>
                 </div>
                 <details className="question-kit">
@@ -190,6 +192,14 @@ export function InterviewOperations({
                   </ol>
                 </details>
                 <div className="interview-card__actions">
+                  <a
+                    href={googleCalendarUrl(interview)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Add to Google Calendar"
+                  >
+                    <CalendarPlus size={14} /> Calendar
+                  </a>
                   {interview.meetingUrl && (
                     <a href={interview.meetingUrl} target="_blank" rel="noreferrer">
                       <ExternalLink size={14} /> Join
@@ -503,4 +513,22 @@ function OperationModal({
       </section>
     </div>
   );
+}
+
+function googleCalendarUrl(interview: Interview): string {
+  const start = new Date(interview.scheduledAt);
+  const end = new Date(start.getTime() + interview.durationMinutes * 60_000);
+  const compact = (date: Date) =>
+    date
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "");
+  const parameters = new URLSearchParams({
+    action: "TEMPLATE",
+    text: `${stageLabels[interview.stage]} interview · ${interview.candidateName}`,
+    dates: `${compact(start)}/${compact(end)}`,
+    details: `${interview.jobTitle}\n${interview.notes}`,
+    location: interview.meetingUrl,
+  });
+  return `https://calendar.google.com/calendar/render?${parameters.toString()}`;
 }
