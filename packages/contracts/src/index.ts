@@ -223,6 +223,66 @@ export const candidateMatchesResponseSchema = z.object({
   requestId: z.string(),
 });
 
+export const interviewStageSchema = z.enum(["SCREENING", "TECHNICAL", "MANAGER", "FINAL"]);
+export const interviewStatusSchema = z.enum(["SCHEDULED", "COMPLETED", "CANCELLED"]);
+export const interviewRecommendationSchema = z.enum([
+  "STRONG_YES",
+  "YES",
+  "MIXED",
+  "NO",
+  "STRONG_NO",
+]);
+
+export const scheduleInterviewRequestSchema = z.object({
+  candidateId: z.string().trim().min(1),
+  stage: interviewStageSchema,
+  scheduledAt: z.iso.datetime(),
+  durationMinutes: z.number().int().min(15).max(240),
+  timezone: z.string().trim().min(2).max(80),
+  meetingUrl: z.union([z.url(), z.literal("")]),
+  notes: z.string().trim().max(2_000),
+});
+
+export const updateInterviewStatusRequestSchema = z.object({ status: interviewStatusSchema });
+export const interviewFeedbackRequestSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  recommendation: interviewRecommendationSchema,
+  strengths: z.string().trim().min(3).max(2_000),
+  concerns: z.string().trim().max(2_000),
+  notes: z.string().trim().max(4_000),
+});
+
+export const interviewSchema = scheduleInterviewRequestSchema.extend({
+  id: z.string(),
+  ownerId: z.string(),
+  jobId: z.string(),
+  candidateName: z.string(),
+  jobTitle: z.string(),
+  status: interviewStatusSchema,
+  calendarProvider: z.enum(["LOCAL", "GOOGLE"]),
+  questions: z.array(z.string()),
+  feedback: interviewFeedbackRequestSchema.extend({ submittedAt: z.string() }).nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const interviewResponseSchema = z.object({
+  data: z.object({ interview: interviewSchema }),
+  requestId: z.string(),
+});
+
+export const interviewsResponseSchema = z.object({
+  data: z.object({
+    interviews: z.array(interviewSchema),
+    summary: z.object({
+      upcoming: z.number().int().nonnegative(),
+      completed: z.number().int().nonnegative(),
+      feedbackPending: z.number().int().nonnegative(),
+    }),
+  }),
+  requestId: z.string(),
+});
+
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
@@ -250,3 +310,11 @@ export type MatchSource = z.infer<typeof matchSourceSchema>;
 export type CandidateMatch = z.infer<typeof candidateMatchSchema>;
 export type CandidateMatchResponse = z.infer<typeof candidateMatchResponseSchema>;
 export type CandidateMatchesResponse = z.infer<typeof candidateMatchesResponseSchema>;
+export type InterviewStage = z.infer<typeof interviewStageSchema>;
+export type InterviewStatus = z.infer<typeof interviewStatusSchema>;
+export type InterviewRecommendation = z.infer<typeof interviewRecommendationSchema>;
+export type ScheduleInterviewRequest = z.infer<typeof scheduleInterviewRequestSchema>;
+export type InterviewFeedbackRequest = z.infer<typeof interviewFeedbackRequestSchema>;
+export type Interview = z.infer<typeof interviewSchema>;
+export type InterviewResponse = z.infer<typeof interviewResponseSchema>;
+export type InterviewsResponse = z.infer<typeof interviewsResponseSchema>;

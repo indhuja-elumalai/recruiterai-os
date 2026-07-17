@@ -108,6 +108,21 @@ Every result includes a score, strengths, gaps, rationale, model/source metadata
 human-review recommendation. Match scores provide decision support only and never trigger
 autonomous rejection.
 
+## Interview operations
+
+The authenticated workspace supports structured interview scheduling and evaluation:
+
+- `GET /api/v1/interviews`
+- `POST /api/v1/interviews`
+- `PATCH /api/v1/interviews/:interviewId/status`
+- `PUT /api/v1/interviews/:interviewId/feedback`
+
+Scheduling generates a stage-aware five-question interview kit grounded in the assigned
+job skills and moves eligible candidates into the interview stage. Recruiters can store
+meeting links, complete or cancel sessions, and submit consistent ratings, recommendations,
+strengths, concerns, and notes. Scheduling remains fully usable with the local calendar
+fallback when Google Calendar is not connected.
+
 ## Git workflow
 
 `main` contains releases, `develop` is the integration branch, and each bounded feature is

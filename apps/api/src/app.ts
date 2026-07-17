@@ -11,6 +11,7 @@ import { authRouter } from "./routes/auth.js";
 import { jobsRouter } from "./routes/jobs.js";
 import { candidatesRouter } from "./routes/candidates.js";
 import { matchesRouter } from "./routes/matches.js";
+import { interviewsRouter } from "./routes/interviews.js";
 
 export function createApp(): express.Express {
   const app = express();
@@ -32,6 +33,7 @@ export function createApp(): express.Express {
   app.use("/api/v1/jobs", jobsRouter);
   app.use("/api/v1/candidates", candidatesRouter);
   app.use("/api/v1/matches", matchesRouter);
+  app.use("/api/v1/interviews", interviewsRouter);
   app.use(notFound);
   app.use(errorHandler);
 
