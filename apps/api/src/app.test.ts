@@ -55,4 +55,9 @@ describe("API foundation", () => {
     const response = await request(createApp()).get("/api/v1/interviews").expect(401);
     expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
   });
+
+  it("protects recruitment analytics from unauthenticated access", async () => {
+    const response = await request(createApp()).get("/api/v1/analytics/overview").expect(401);
+    expect(response.body.error.code).toBe("AUTHENTICATION_REQUIRED");
+  });
 });

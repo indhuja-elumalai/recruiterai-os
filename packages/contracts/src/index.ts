@@ -283,6 +283,39 @@ export const interviewsResponseSchema = z.object({
   requestId: z.string(),
 });
 
+export const analyticsResponseSchema = z.object({
+  data: z.object({
+    generatedAt: z.string(),
+    overview: z.object({
+      totalJobs: z.number().int().nonnegative(),
+      activeJobs: z.number().int().nonnegative(),
+      totalCandidates: z.number().int().nonnegative(),
+      hires: z.number().int().nonnegative(),
+      upcomingInterviews: z.number().int().nonnegative(),
+      averageMatchScore: z.number().min(0).max(100),
+    }),
+    funnel: z.array(
+      z.object({ stage: candidateStatusSchema, count: z.number().int().nonnegative() }),
+    ),
+    topJobs: z.array(
+      z.object({ id: z.string(), title: z.string(), applicants: z.number().int().nonnegative() }),
+    ),
+    quality: z.object({
+      analyzedCandidates: z.number().int().nonnegative(),
+      strongMatches: z.number().int().nonnegative(),
+      geminiAnalyses: z.number().int().nonnegative(),
+      fallbackAnalyses: z.number().int().nonnegative(),
+    }),
+    interviews: z.object({
+      scheduled: z.number().int().nonnegative(),
+      completed: z.number().int().nonnegative(),
+      feedbackSubmitted: z.number().int().nonnegative(),
+      averageRating: z.number().min(0).max(5),
+    }),
+  }),
+  requestId: z.string(),
+});
+
 export type ApiError = z.infer<typeof apiErrorSchema>;
 export type HealthResponse = z.infer<typeof healthResponseSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
@@ -318,3 +351,4 @@ export type InterviewFeedbackRequest = z.infer<typeof interviewFeedbackRequestSc
 export type Interview = z.infer<typeof interviewSchema>;
 export type InterviewResponse = z.infer<typeof interviewResponseSchema>;
 export type InterviewsResponse = z.infer<typeof interviewsResponseSchema>;
+export type AnalyticsResponse = z.infer<typeof analyticsResponseSchema>;

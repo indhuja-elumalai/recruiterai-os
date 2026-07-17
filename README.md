@@ -123,6 +123,14 @@ meeting links, complete or cancel sessions, and submit consistent ratings, recom
 strengths, concerns, and notes. Scheduling remains fully usable with the local calendar
 fallback when Google Calendar is not connected.
 
+## Recruitment analytics
+
+`GET /api/v1/analytics/overview` provides account-scoped operational reporting without
+returning candidate PII. The dashboard visualizes active roles, candidate funnel stages,
+job demand, match-engine coverage and source, interview completion, feedback coverage, and
+average interviewer ratings. Charts use lightweight responsive CSS and require no paid
+analytics or visualization service.
+
 ## Git workflow
 
 `main` contains releases, `develop` is the integration branch, and each bounded feature is
