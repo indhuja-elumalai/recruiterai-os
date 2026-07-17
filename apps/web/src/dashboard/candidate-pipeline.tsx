@@ -1,6 +1,7 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import {
   BriefcaseBusiness,
+  BrainCircuit,
   CheckCircle2,
   FileText,
   LoaderCircle,
@@ -15,6 +16,9 @@ import {
 } from "lucide-react";
 import type {
   Candidate,
+  CandidateMatch,
+  CandidateMatchesResponse,
+  CandidateMatchResponse,
   CandidateResponse,
   CandidatesResponse,
   CandidateStatus,
@@ -43,6 +47,7 @@ export function CandidatePipeline({
   onCandidateChanged(): Promise<void>;
 }) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [matches, setMatches] = useState<Record<string, CandidateMatch>>({});
   const [summary, setSummary] = useState({ total: 0, screening: 0, interviews: 0, hired: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,11 +59,19 @@ export function CandidatePipeline({
     setLoading(true);
     setError(null);
     try {
-      const response = await apiRequest<CandidatesResponse>("/candidates", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      setCandidates(response.data.candidates);
-      setSummary(response.data.summary);
+      const [candidateResponse, matchResponse] = await Promise.all([
+        apiRequest<CandidatesResponse>("/candidates", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+        apiRequest<CandidateMatchesResponse>("/matches", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }),
+      ]);
+      setCandidates(candidateResponse.data.candidates);
+      setSummary(candidateResponse.data.summary);
+      setMatches(
+        Object.fromEntries(matchResponse.data.matches.map((match) => [match.candidateId, match])),
+      );
     } catch (requestError) {
       setError(
         requestError instanceof ApiRequestError
@@ -92,6 +105,29 @@ export function CandidatePipeline({
         requestError instanceof ApiRequestError
           ? requestError.message
           : "Could not update candidate status",
+      );
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const analyzeCandidate = async (candidate: Candidate) => {
+    setSavingId(candidate.id);
+    setError(null);
+    try {
+      const response = await apiRequest<CandidateMatchResponse>(
+        `/matches/candidates/${candidate.id}`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
+      setMatches((current) => ({ ...current, [candidate.id]: response.data.match }));
+    } catch (requestError) {
+      setError(
+        requestError instanceof ApiRequestError
+          ? requestError.message
+          : "Could not analyze candidate match",
       );
     } finally {
       setSavingId(null);
@@ -175,7 +211,9 @@ export function CandidatePipeline({
               <CandidateRow
                 key={candidate.id}
                 candidate={candidate}
+                match={matches[candidate.id]}
                 saving={savingId === candidate.id}
+                onAnalyze={() => void analyzeCandidate(candidate)}
                 onStatusChange={(status) => void updateStatus(candidate, status)}
               />
             ))}
@@ -220,10 +258,14 @@ function CandidateMetric({
 
 function CandidateRow({
   candidate,
+  match,
+  onAnalyze,
   onStatusChange,
   saving,
 }: {
   candidate: Candidate;
+  match?: CandidateMatch;
+  onAnalyze(): void;
   onStatusChange(status: CandidateStatus): void;
   saving: boolean;
 }) {
@@ -261,6 +303,35 @@ function CandidateRow({
             {candidate.resume.extractedCharacters.toLocaleString()} characters extracted
           </small>
         </span>
+      </div>
+      <div className="candidate-row__match">
+        {match ? (
+          <>
+            <span className={`match-score match-score--${match.recommendation.toLowerCase()}`}>
+              {match.score}
+            </span>
+            <div title={match.rationale}>
+              <strong>{match.recommendation.replaceAll("_", " ")}</strong>
+              <small>{match.source === "GEMINI" ? match.model : "Explainable fallback"}</small>
+            </div>
+            <button
+              aria-label={`Reanalyze ${candidate.name}`}
+              disabled={saving}
+              onClick={onAnalyze}
+            >
+              <BrainCircuit size={14} />
+            </button>
+          </>
+        ) : (
+          <button className="candidate-analyze" disabled={saving} onClick={onAnalyze}>
+            {saving ? (
+              <LoaderCircle className="workspace-spin" size={14} />
+            ) : (
+              <BrainCircuit size={14} />
+            )}
+            Analyze match
+          </button>
+        )}
       </div>
       <div className="candidate-row__stage">
         {saving && <LoaderCircle className="workspace-spin" size={14} />}

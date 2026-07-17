@@ -130,7 +130,10 @@
 
 .candidate-row {
   display: grid;
-  grid-template-columns: auto minmax(150px, 1.25fr) minmax(150px, 1fr) minmax(150px, 0.9fr) auto;
+  grid-template-columns: auto minmax(140px, 1.15fr) minmax(130px, 0.9fr) minmax(
+      135px,
+      0.8fr
+    ) minmax(130px, 0.8fr) auto;
   gap: 13px;
   align-items: center;
   padding: 16px 18px;
@@ -156,8 +159,86 @@
 
 .candidate-row__identity,
 .candidate-row__role,
-.candidate-row__resume {
+.candidate-row__resume,
+.candidate-row__match {
   min-width: 0;
+}
+
+.candidate-row__match {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.candidate-row__match > div {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.candidate-row__match strong {
+  overflow: hidden;
+  color: #aeb9ca;
+  font-size: 7px;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidate-row__match small {
+  overflow: hidden;
+  color: #536075;
+  font-size: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-score {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 2px solid #64748b;
+  border-radius: 50%;
+  color: #cbd5e1;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.match-score--strong_match {
+  border-color: #22c55e;
+  color: #86efac;
+}
+
+.match-score--potential_match {
+  border-color: #f59e0b;
+  color: #fde68a;
+}
+
+.candidate-row__match button {
+  display: grid;
+  min-width: 30px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--workspace-line);
+  border-radius: 8px;
+  background: #10151e;
+  color: #60a5fa;
+  cursor: pointer;
+}
+
+.candidate-row__match .candidate-analyze {
+  display: inline-flex;
+  width: auto;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  font-size: 8px;
+  font-weight: 750;
 }
 
 .candidate-row__identity > div {
@@ -469,7 +550,8 @@
   }
 
   .candidate-row__role,
-  .candidate-row__resume {
+  .candidate-row__resume,
+  .candidate-row__match {
     grid-column: 2;
   }
 
