@@ -16,7 +16,7 @@ export function Header() {
   const backgroundColor = useTransform(
     scrollY,
     [0, 100],
-    ["rgba(10, 10, 10, 0)", "rgba(10, 10, 10, 0.4)"],
+    ["rgba(7, 9, 13, 0.72)", "rgba(7, 9, 13, 0.94)"],
   );
 
   const borderOpacity = useTransform(
