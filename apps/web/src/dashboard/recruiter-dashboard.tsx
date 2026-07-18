@@ -67,6 +67,10 @@ export function RecruiterDashboard() {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [candidateVersion, setCandidateVersion] = useState(0);
 
+  const scrollToSection = (selector: string) => {
+    document.querySelector(selector)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const authHeaders = useCallback(
     () => ({ Authorization: `Bearer ${accessToken}` }),
     [accessToken],
@@ -142,30 +146,30 @@ export function RecruiterDashboard() {
           </span>
         </div>
         <nav className="workspace-nav" aria-label="Workspace navigation">
-          <button className="workspace-nav__item workspace-nav__item--active">
+          <button
+            className="workspace-nav__item"
+            onClick={() => scrollToSection("#workspace-overview")}
+          >
             <LayoutDashboard size={17} /> Overview
           </button>
-          <button className="workspace-nav__item">
+          <button className="workspace-nav__item" onClick={() => scrollToSection("#jobs-panel")}>
             <BriefcaseBusiness size={17} /> Jobs <span>{summary.total}</span>
           </button>
           <button
             className="workspace-nav__item"
-            onClick={() =>
-              document.querySelector("#candidate-pipeline")?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => scrollToSection("#candidate-pipeline")}
           >
             <Users size={17} /> Candidates
           </button>
-          <button className="workspace-nav__item">
-            <Sparkles size={17} /> AI matching
+          <button
+            className="workspace-nav__item"
+            onClick={() => scrollToSection("#interview-operations")}
+          >
+            <CalendarDays size={17} /> Interviews
           </button>
           <button
             className="workspace-nav__item"
-            onClick={() =>
-              document
-                .querySelector("#recruitment-analytics")
-                ?.scrollIntoView({ behavior: "smooth" })
-            }
+            onClick={() => scrollToSection("#recruitment-analytics")}
           >
             <BarChart3 size={17} /> Analytics
           </button>
@@ -182,7 +186,24 @@ export function RecruiterDashboard() {
         </div>
       </aside>
 
-      <main className="workspace-main">
+      <main className="workspace-main" id="workspace-overview">
+        <nav className="workspace-mobile-nav" aria-label="Dashboard sections">
+          <button onClick={() => scrollToSection("#workspace-overview")}>
+            <LayoutDashboard size={15} /> Overview
+          </button>
+          <button onClick={() => scrollToSection("#jobs-panel")}>
+            <BriefcaseBusiness size={15} /> Jobs
+          </button>
+          <button onClick={() => scrollToSection("#candidate-pipeline")}>
+            <Users size={15} /> Candidates
+          </button>
+          <button onClick={() => scrollToSection("#interview-operations")}>
+            <CalendarDays size={15} /> Interviews
+          </button>
+          <button onClick={() => scrollToSection("#recruitment-analytics")}>
+            <BarChart3 size={15} /> Analytics
+          </button>
+        </nav>
         <header className="workspace-topbar">
           <div>
             <span className="workspace-topbar__eyebrow">Recruitment workspace</span>
@@ -216,7 +237,7 @@ export function RecruiterDashboard() {
           <Metric icon={Users} label="Applicants" value={summary.applicants} tone="purple" />
         </section>
 
-        <section className="jobs-panel">
+        <section className="jobs-panel" id="jobs-panel">
           <div className="jobs-panel__header">
             <div>
               <h2>Open roles</h2>
@@ -273,13 +294,21 @@ export function RecruiterDashboard() {
         <CandidatePipeline
           accessToken={accessToken!}
           jobs={jobs}
+          refreshKey={candidateVersion}
           onCandidateChanged={async () => {
             await loadJobs();
             setCandidateVersion((version) => version + 1);
           }}
         />
-        <InterviewOperations accessToken={accessToken!} refreshKey={candidateVersion} />
-        <RecruitmentAnalytics accessToken={accessToken!} />
+        <InterviewOperations
+          accessToken={accessToken!}
+          refreshKey={candidateVersion}
+          onOperationsChanged={async () => {
+            await loadJobs();
+            setCandidateVersion((version) => version + 1);
+          }}
+        />
+        <RecruitmentAnalytics accessToken={accessToken!} refreshKey={candidateVersion} />
       </main>
 
       {editorJob !== undefined && (

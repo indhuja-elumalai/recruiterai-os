@@ -41,10 +41,12 @@ export function CandidatePipeline({
   accessToken,
   jobs,
   onCandidateChanged,
+  refreshKey,
 }: {
   accessToken: string;
   jobs: Job[];
   onCandidateChanged(): Promise<void>;
+  refreshKey: number;
 }) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [matches, setMatches] = useState<Record<string, CandidateMatch>>({});
@@ -85,7 +87,7 @@ export function CandidatePipeline({
 
   useEffect(() => {
     void loadCandidates();
-  }, [loadCandidates]);
+  }, [loadCandidates, refreshKey]);
 
   const updateStatus = async (candidate: Candidate, status: CandidateStatus) => {
     setSavingId(candidate.id);
@@ -99,7 +101,7 @@ export function CandidatePipeline({
       setCandidates((current) =>
         current.map((item) => (item.id === candidate.id ? response.data.candidate : item)),
       );
-      await loadCandidates();
+      await Promise.all([loadCandidates(), onCandidateChanged()]);
     } catch (requestError) {
       setError(
         requestError instanceof ApiRequestError
@@ -123,6 +125,7 @@ export function CandidatePipeline({
         },
       );
       setMatches((current) => ({ ...current, [candidate.id]: response.data.match }));
+      await onCandidateChanged();
     } catch (requestError) {
       setError(
         requestError instanceof ApiRequestError

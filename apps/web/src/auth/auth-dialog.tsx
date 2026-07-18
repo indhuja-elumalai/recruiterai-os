@@ -195,9 +195,11 @@ export function AuthDialog({ mode, open, onModeChange, onOpenChange }: AuthDialo
           {mode === "login" && (
             <div className="auth-form__helper-row">
               <span>Use your workspace password.</span>
-              <button type="button" onClick={() => onModeChange("reset")}>
-                Reset password
-              </button>
+              {import.meta.env.DEV && (
+                <button type="button" onClick={() => onModeChange("reset")}>
+                  Reset password
+                </button>
+              )}
             </div>
           )}
           {mode === "reset" && (

@@ -36,9 +36,11 @@ const stageLabels: Record<InterviewStage, string> = {
 
 export function InterviewOperations({
   accessToken,
+  onOperationsChanged,
   refreshKey,
 }: {
   accessToken: string;
+  onOperationsChanged(): Promise<void>;
   refreshKey: number;
 }) {
   const [interviews, setInterviews] = useState<Interview[]>([]);
@@ -88,7 +90,7 @@ export function InterviewOperations({
         headers: { Authorization: `Bearer ${accessToken}` },
         body: JSON.stringify({ status }),
       });
-      await loadOperations();
+      await Promise.all([loadOperations(), onOperationsChanged()]);
     } catch (requestError) {
       setError(
         requestError instanceof ApiRequestError
@@ -251,7 +253,7 @@ export function InterviewOperations({
           onClose={() => setScheduleOpen(false)}
           onSaved={async () => {
             setScheduleOpen(false);
-            await loadOperations();
+            await Promise.all([loadOperations(), onOperationsChanged()]);
           }}
         />
       )}
@@ -262,7 +264,7 @@ export function InterviewOperations({
           onClose={() => setFeedbackInterview(null)}
           onSaved={async () => {
             setFeedbackInterview(null);
-            await loadOperations();
+            await Promise.all([loadOperations(), onOperationsChanged()]);
           }}
         />
       )}

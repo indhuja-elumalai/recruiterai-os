@@ -13,7 +13,13 @@ import type { AnalyticsResponse } from "@recruiterai/contracts";
 import { ApiRequestError, apiRequest } from "../lib/api";
 import "./recruitment-analytics.css";
 
-export function RecruitmentAnalytics({ accessToken }: { accessToken: string }) {
+export function RecruitmentAnalytics({
+  accessToken,
+  refreshKey,
+}: {
+  accessToken: string;
+  refreshKey: number;
+}) {
   const [analytics, setAnalytics] = useState<AnalyticsResponse["data"] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +45,7 @@ export function RecruitmentAnalytics({ accessToken }: { accessToken: string }) {
 
   useEffect(() => {
     void loadAnalytics();
-  }, [loadAnalytics]);
+  }, [loadAnalytics, refreshKey]);
 
   const maxFunnel = Math.max(1, ...(analytics?.funnel.map((item) => item.count) ?? [1]));
   const maxApplicants = Math.max(1, ...(analytics?.topJobs.map((item) => item.applicants) ?? [1]));
