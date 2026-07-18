@@ -44,6 +44,9 @@ Health check: /api/v1/health
 The service branch must contain the monorepo. The initial `main` snapshot does not contain the
 API workspace and cannot run the start command.
 
+The root `.npmrc` also enforces installation of build-time development dependencies when
+`NODE_ENV=production`, so Render services that retain `npm ci && npm run build` remain compatible.
+
 ## Production smoke test
 
 After deployment, verify:
