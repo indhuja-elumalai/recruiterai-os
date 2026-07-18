@@ -36,7 +36,7 @@ If a service was created before the Blueprint, set its repository root to the re
 (not `apps/web`) and use:
 
 ```text
-Build command: npm ci && npm run build
+Build command: npm ci --include=dev && npm run build
 Start command: npm run start -w @recruiterai/api
 Health check: /api/v1/health
 ```
