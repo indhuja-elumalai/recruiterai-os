@@ -163,6 +163,7 @@ are pushed only after local review and approval.
 
 - [Architecture and trust boundaries](docs/ARCHITECTURE.md)
 - [API reference](docs/API.md)
+- [Render deployment guide](docs/DEPLOYMENT.md)
 - [Security policy](SECURITY.md)
 
 ## Author
